@@ -1,49 +1,89 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { logout } from '../actions'
-import Link from 'next/link'
+"use client"
+
+import { createClient } from "@/lib/supabase/client"
+import { logout } from "../actions"
+import Link from "next/link"
 import {
   BookOpen,
   CalendarDays,
   Settings,
   UserCircle,
   LogOut,
-} from 'lucide-react'
+  Menu,
+} from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import type { User } from "@supabase/supabase-js"
 
-export default async function PortalLayout({
+// --- 1. DEFINE THE USER PROFILE TYPE (NEW) ---
+type Profile = {
+  full_name: string | null
+}
+
+export default function PortalLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false) // Sidebar state
+  const router = useRouter()
+  const pathname = usePathname()
 
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) {
-    redirect('/login')
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient()
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser()
+
+      if (error || !user) {
+        router.push("/login")
+        return
+      }
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single()
+
+      setUser(user)
+      setProfile(profileData)
+    }
+
+    fetchUser()
+  }, [router])
+
+  // --- 2. CLOSE SIDEBAR ON NAVIGATION (NEW) ---
+  useEffect(() => {
+    setIsSidebarOpen(false)
+  }, [pathname])
+
+  if (!user) {
+    return null // or a loading spinner
   }
 
-  // --- 1. FETCH THE profiles DATA (NEW CODE) ---
-  // We fetch the profiles table to get the full_name
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', user.id)
-    .single()
-  // --- END OF NEW CODE ---
-
-  // --- 2. DETERMINE DISPLAY NAME & AVATAR (NEW CODE) ---
   const displayName =
-    profiles?.full_name && profiles.full_name.trim() !== ''
-      ? profiles.full_name
+    profile?.full_name && profile.full_name.trim() !== ""
+      ? profile.full_name
       : user.email
-  
-  const avatarInitial = (profiles?.full_name?.[0] || user.email?.[0])?.toUpperCase()
-  // --- END OF NEW CODE ---
+  const avatarInitial = (
+    profile?.full_name?.[0] || user.email?.[0]
+  )?.toUpperCase()
 
   return (
-    <div className="flex w-full min-h-screen">
+    <div className="flex w-full h-screen relative">
       {/* --- SIDEBAR --- */}
-      <aside className="w-48 flex flex-col p-4 border-r border-zinc-800 bg-zinc-900/50">
+      <aside
+        className={`w-48 flex flex-col p-4 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 
+                   transform transition-transform duration-300 ease-in-out 
+                   fixed md:relative h-full z-10 overflow-y-auto
+                   ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
+                   md:translate-x-0`}
+      >
         <div className="flex-1 flex flex-col gap-2">
           <span className="font-semibold text-lg mb-4">BSCS-A Portal</span>
 
@@ -51,14 +91,14 @@ export default async function PortalLayout({
           <nav className="flex flex-col gap-2">
             <Link
               href="/"
-              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-800 text-zinc-300"
+              className="flex items-center gap-3 px-3 py-2 rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             >
               <BookOpen size={18} />
               <span>My Courses</span>
             </Link>
             <Link
               href="/schedule"
-              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-800 text-zinc-300"
+              className="flex items-center gap-3 px-3 py-2 rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             >
               <CalendarDays size={20} />
               <span>Schedule</span>
@@ -70,20 +110,20 @@ export default async function PortalLayout({
         <div className="flex flex-col gap-2">
           <Link
             href="/profile"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-800 text-zinc-300"
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
             <UserCircle size={18} />
             <span>profile</span>
           </Link>
           <Link
             href="/settings"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-800 text-zinc-300"
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
             <Settings size={18} />
             <span>Settings</span>
           </Link>
 
-          <div className="border-t border-zinc-700 my-2"></div>
+          <div className="border-t border-zinc-200 dark:border-zinc-700 my-2"></div>
 
           {/* Logout Button */}
           <form action={logout} className="w-full">
@@ -96,10 +136,10 @@ export default async function PortalLayout({
           {/* --- 3. UPDATED USER DISPLAY (NEW CODE) --- */}
           {/* We now use the new variables here */}
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white">
               {avatarInitial}
             </div>
-            <span className="text-sm text-zinc-400 truncate">
+            <span className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
               {displayName}
             </span>
           </div>
@@ -108,9 +148,25 @@ export default async function PortalLayout({
       </aside>
 
       {/* --- MAIN CONTENT AREA --- */}
-      <main className="flex-1 p-4 bg-zinc-900/80">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col bg-zinc-50 dark:bg-zinc-900/80 overflow-y-auto">
+        {/* --- HEADER (NEW) --- */}
+        <header className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 md:hidden">
+          <button onClick={() => setIsSidebarOpen(true)}>
+            <Menu size={24} />
+          </button>
+          <span className="font-semibold text-lg">BSCS-A Portal</span>
+        </header>
+
+        <main className="flex-1 p-4">{children}</main>
+      </div>
+
+      {/* --- OVERLAY (NEW) --- */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-5 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
     </div>
   )
 }
