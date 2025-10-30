@@ -14,8 +14,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #001c36;
+    --foreground: #ffffff;
   }
 }
 
@@ -23,4 +23,122 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* --- React Big Calendar Dark Theme Overrides (v4 - Color Focused) --- */
+
+/* Change main background and text colors */
+.rbc-calendar {
+  background-color: #18181b; /* zinc-900 */
+  color: #d4d4d8; /* zinc-300 */
+  border-color: #3f3f46; /* zinc-700 */ /* Ensure borders match */
+}
+
+/* Toolbar text and button backgrounds/borders */
+.rbc-toolbar {
+  color: #e4e4e7; /* zinc-200 */
+  border-bottom-color: #3f3f46; /* zinc-700 */
+}
+.rbc-toolbar button {
+  color: #d4d4d8; /* zinc-300 */
+  background-color: #27272a; /* zinc-800 */
+  border-color: #52525b; /* zinc-600 */
+}
+.rbc-toolbar button:hover:not(:disabled),
+.rbc-toolbar button:focus:not(:disabled) {
+  background-color: #3f3f46; /* zinc-700 */
+  border-color: #71717a; /* zinc-500 */
+  color: #f4f4f5; /* zinc-100 */
+}
+.rbc-toolbar button.rbc-active {
+  background-color: #3b82f6; /* blue-500 */
+  border-color: #2563eb; /* blue-600 */
+  color: white;
+}
+.rbc-toolbar button:disabled {
+  background-color: #27272a !important; /* Keep bg consistent when disabled */
+  border-color: #3f3f46 !important; /* Keep border consistent */
+  opacity: 0.5;
+}
+
+/* Day Headers (Sun, Mon...) background and text */
+.rbc-header {
+  color: #a1a1aa; /* zinc-400 */
+  background-color: #27272a; /* zinc-800 */
+  border-bottom-color: #52525b; /* zinc-600 */
+  border-left-color: #3f3f46; /* zinc-700 */ /* Add left border color */
+}
+
+/* Day cell backgrounds and borders */
+.rbc-day-bg {
+  border-left-color: #3f3f46; /* zinc-700 */
+}
+.rbc-month-row {
+  border-top-color: #3f3f46; /* zinc-700 */
+}
+
+/* Date number colors */
+.rbc-date-cell {
+  color: #a1a1aa; /* zinc-400 */
+}
+.rbc-date-cell.rbc-now { /* Today's number */
+  color: #60a5fa !important; /* blue-400 */
+}
+.rbc-off-range .rbc-date-cell { /* Numbers outside current month */
+  color: #52525b !important; /* zinc-600 */
+}
+
+/* Background for dates outside current month */
+.rbc-off-range-bg {
+  background-color: #1c1c1f; /* Slightly darker than main bg */
+}
+/* Background for today */
+.rbc-today {
+  background-color: rgba(59, 130, 246, 0.1); /* blue-500 lightened */
+}
+
+/* Event color */
+.rbc-event, .rbc-day-slot .rbc-event {
+  background-color: #3b82f6; /* blue-500 */
+  border-color: #2563eb; /* blue-600 */
+  color: white;
+}
+
+/* Show More link color */
+.rbc-show-more {
+  color: #93c5fd; /* blue-300 */
+}
+.rbc-show-more:hover {
+  color: #60a5fa; /* blue-400 */
+}
+
+/* Selected cell background */
+.rbc-selected-cell {
+  background-color: rgba(96, 165, 250, 0.15); /* blue-400 very light */
+}
+
+/* Time Grid Specifics */
+.rbc-time-view { border-color: #3f3f46 !important; }
+.rbc-time-header { background-color: #27272a !important; border-bottom-color: #52525b !important; }
+.rbc-time-header-content { border-left-color: #3f3f46 !important; }
+.rbc-time-content { background-color: #1f1f22 !important; border-top-color: #52525b !important; }
+.rbc-time-content > * + * > * { border-left-color: #3f3f46 !important; }
+.rbc-timeslot-group { border-bottom-color: #3f3f46 !important; }
+.rbc-time-gutter { background-color: #27272a !important; border-right-color: #52525b !important; color: #a1a1aa !important; }
+
+/* Keep these specific background overrides from v5 */
+.rbc-day-slot { /* Target the background container for day/week */
+    background-color: #1f1f22 !important; /* Match rbc-time-content */
+}
+.rbc-day-slot.rbc-today { /* Ensure today background in week/day view */
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+.rbc-off-range-bg {
+  background-color: #1c1c1f !important; /* Darker off-range bg */
+}
+.rbc-today {
+  background-color: rgba(59, 130, 246, 0.15) !important; /* Slightly darker today bg */
+}
+.rbc-time-slot {
+    background-color: transparent !important; /* Ensure slots themselves are transparent over .rbc-day-slot */
 }
