@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,6 +22,7 @@ export default function RootLayout({
         <div className="min-h-screen flex flex-col items-center">
           {children}
         </div>
+        <Analytics />
       </body>
     </html>
   )
