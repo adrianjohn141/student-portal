@@ -1,76 +1,71 @@
 import { login, signup } from './actions'
+import Image from 'next/image'
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams?: { message?: string }
-}) {
-  // Read the message string from searchParams
-  const resolvedParams = await Promise.resolve(searchParams)
-  const message = resolvedParams?.message
-
+export default function LoginPage() {
   return (
-    <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
-      <div className="flex flex-col gap-2 text-center">
-        <h1 className="text-2xl font-bold">BSCS-A Portal</h1>
-        <p className="text-sm text-zinc-400">
-          Sign in or create an account to continue
+    <div className="relative flex min-h-screen w-screen flex-col items-center justify-center">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/background.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col justify-center space-y-6 rounded-lg bg-black/30 p-8 shadow-lg">
+        <div className="flex flex-col items-center space-y-2 text-center">
+          <Image src="/globe.svg" alt="Globe Icon" width={48} height={48} />
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            BSCS-A Portal
+          </h1>
+          <p className="text-sm text-zinc-300">
+            Enter your credentials to sign in or create an account
+          </p>
+        </div>
+        <LoginForm />
+        <p className="px-8 text-center text-sm text-zinc-300">
+          By signing up, you agree that you are a student with a valid psu.edu.ph email.
         </p>
       </div>
-
-      {/* Pass *only* the message string down */}
-      <LoginForm message={message} />
-
-      <p className="px-8 text-center text-sm text-zinc-400">
-        By signing up, you agree that you are a student with a valid .edu email.
-      </p>
     </div>
   )
 }
 
-function LoginForm({
-  message,
-}: {
-  message?: string
-}) {
+function LoginForm() {
   return (
-    <form className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground">
-      <label className="text-md" htmlFor="email">
-        Email
-      </label>
-      <input
-        className="rounded-md px-4 py-2 bg-inherit border mb-2"
-        name="email"
-        placeholder="you@example.edu"
-        required
-      />
-      <label className="text-md" htmlFor="password">
-        Password
-      </label>
-      <input
-        className="rounded-md px-4 py-2 bg-inherit border mb-4"
-        type="password"
-        name="password"
-        placeholder="••••••••"
-        required
-      />
-
-      {/* Display Server-Side Error Messages */}
-      {message && (
-        <p className="mb-4 p-3 bg-red-900 text-red-100 text-center text-sm">
-          {message}
-        </p>
-      )}
-
+    <form className="grid gap-4">
+      <div className="grid gap-2">
+        <label className="text-sm font-medium text-white" htmlFor="email">
+          Email
+        </label>
+        <input
+          className="rounded-md px-4 py-2 bg-inherit border border-zinc-600 text-white placeholder-zinc-400"
+          id="email"
+          name="email"
+          placeholder="you@example.edu"
+          required
+          type="email"
+        />
+      </div>
+      <div className="grid gap-2">
+        <label className="text-sm font-medium text-white" htmlFor="password">
+          Password
+        </label>
+        <input
+          className="rounded-md px-4 py-2 bg-inherit border border-zinc-600 text-white placeholder-zinc-400"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          required
+          type="password"
+        />
+      </div>
       <button
         formAction={login}
-        className="bg-blue-600 hover:bg-blue-700 rounded-md px-4 py-2 text-white mb-2"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
       >
         Sign In
       </button>
       <button
         formAction={signup}
-        className="border border-foreground/20 rounded-md px-4 py-2 text-white hover:bg-zinc-800"
+        className="w-full border border-zinc-600 hover:bg-zinc-800 text-white font-semibold py-2 px-4 rounded-md"
       >
         Sign Up
       </button>
