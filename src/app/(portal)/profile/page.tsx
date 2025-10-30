@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { updateProfile } from './actions'
+import { updateprofiles } from './actions'
 
-export default async function ProfilePage({
+export default async function profilesPage({
   searchParams,
 }: {
   searchParams?: { message?: string }
@@ -18,23 +18,23 @@ export default async function ProfilePage({
     return redirect('/login')
   }
 
-  // Fetch the profile data
-  const { data: profile, error } = await supabase
-    .from('profile')
+  // Fetch the profiles data
+  const { data: profiles, error } = await supabase
+    .from('profiles')
     .select('full_name')
     .eq('id', user.id)
     .single() 
 
   if (error && error.code !== 'PGRST116') {
     // PGRST116 means no row was found, which is fine
-    console.error('Error fetching profile:', error)
+    console.error('Error fetching profiles:', error)
   }
 
   return (
     // We remove gap-8 from here
     <div className="flex flex-col">
       {/* Add mb-8 (margin-bottom) here */}
-      <h1 className="text-3xl font-bold mb-8">My Profile</h1>
+      <h1 className="text-3xl font-bold mb-8">My profiles</h1>
 
       {/* --- FIX: Added mx-auto to center this div --- */}
       <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg max-w-lg mx-auto">
@@ -44,7 +44,7 @@ export default async function ProfilePage({
           instructors and administration.
         </p>
 
-        <form action={updateProfile} className="flex flex-col gap-4">
+        <form action={updateprofiles} className="flex flex-col gap-4">
           <div>
             <label htmlFor="email" className="block text-sm text-zinc-400 mb-2">
               Email
@@ -69,7 +69,7 @@ export default async function ProfilePage({
               type="text"
               id="full_name"
               name="full_name"
-              defaultValue={profile?.full_name || ''}
+              defaultValue={profiles?.full_name || ''}
               className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
   
               placeholder="Your Full Name"
@@ -88,7 +88,7 @@ export default async function ProfilePage({
               type="submit"
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-medium"
             >
-              Update Profile
+              Update profiles
             </button>
           </div>
         </form>

@@ -22,10 +22,10 @@ export default async function PortalLayout({
     redirect('/login')
   }
 
-  // --- 1. FETCH THE PROFILE DATA (NEW CODE) ---
-  // We fetch the profile table to get the full_name
-  const { data: profile } = await supabase
-    .from('profile')
+  // --- 1. FETCH THE profiles DATA (NEW CODE) ---
+  // We fetch the profiles table to get the full_name
+  const { data: profiles } = await supabase
+    .from('profiles')
     .select('full_name')
     .eq('id', user.id)
     .single()
@@ -33,11 +33,11 @@ export default async function PortalLayout({
 
   // --- 2. DETERMINE DISPLAY NAME & AVATAR (NEW CODE) ---
   const displayName =
-    profile?.full_name && profile.full_name.trim() !== ''
-      ? profile.full_name
+    profiles?.full_name && profiles.full_name.trim() !== ''
+      ? profiles.full_name
       : user.email
   
-  const avatarInitial = (profile?.full_name?.[0] || user.email?.[0])?.toUpperCase()
+  const avatarInitial = (profiles?.full_name?.[0] || user.email?.[0])?.toUpperCase()
   // --- END OF NEW CODE ---
 
   return (
@@ -66,14 +66,14 @@ export default async function PortalLayout({
           </nav>
         </div>
 
-        {/* User Profile & Settings Navigation */}
+        {/* User profiles & Settings Navigation */}
         <div className="flex flex-col gap-2">
           <Link
-            href="/profile"
+            href="/profiles"
             className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-800 text-zinc-300"
           >
             <UserCircle size={18} />
-            <span>Profile</span>
+            <span>profiles</span>
           </Link>
           <Link
             href="/settings"
