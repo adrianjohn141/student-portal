@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-export async function updateprofiles(formData: FormData) {
+export async function updateprofile(formData: FormData) {
   const supabase = await createClient()
 
   // Check if the user is authenticated
@@ -15,7 +15,7 @@ export async function updateprofiles(formData: FormData) {
 
   const full_name = formData.get('full_name') as string
 
-  // Upsert the user's profiles to create or update the row
+  // Upsert the user's profile to create or update the row
   // Your 'upsert' logic is correct!
   const { error } = await supabase
     .from('profiles')
@@ -24,15 +24,15 @@ export async function updateprofiles(formData: FormData) {
     .select() 
 
   if (error) {
-    console.error('Error updating profiles:', error)
-    return redirect('/profiles?message=Error updating profiles')
+    console.error('Error updating profile:', error)
+    return redirect('/profile?message=Error updating profile')
   }
 
   // --- FIX ---
   // Revalidate the data for ALL pages that use the sidebar
   revalidatePath('/')
-  revalidatePath('/profiles')
+  revalidatePath('/profile')
   // --- END FIX ---
 
-  return redirect('/profiles?message=profiles updated successfully!')
+  return redirect('/profile?message=profile updated successfully!')
 }

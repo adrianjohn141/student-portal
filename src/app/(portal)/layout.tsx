@@ -66,14 +66,14 @@ export default async function PortalLayout({
           </nav>
         </div>
 
-        {/* User profiles & Settings Navigation */}
+        {/* User profile & Settings Navigation */}
         <div className="flex flex-col gap-2">
           <Link
-            href="/profiles"
+            href="/profile"
             className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-800 text-zinc-300"
           >
             <UserCircle size={18} />
-            <span>profiles</span>
+            <span>profile</span>
           </Link>
           <Link
             href="/settings"
