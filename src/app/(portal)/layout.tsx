@@ -14,6 +14,7 @@ import {
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import type { User } from "@supabase/supabase-js"
+import PageTransition from "@/components/PageTransition"
 
 // --- 1. DEFINE THE USER PROFILE TYPE (NEW) ---
 type Profile = {
@@ -78,7 +79,7 @@ export default function PortalLayout({
     <div className="flex w-full h-screen relative">
       {/* --- SIDEBAR --- */}
       <aside
-        className={`w-48 flex flex-col p-4 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 
+        className={`w-48 flex flex-col p-4 border-r border-white/20 bg-white/10 backdrop-blur-lg
                    transform transition-transform duration-300 ease-in-out 
                    fixed md:relative h-full z-10 overflow-y-auto
                    ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
@@ -148,16 +149,18 @@ export default function PortalLayout({
       </aside>
 
       {/* --- MAIN CONTENT AREA --- */}
-      <div className="flex-1 flex flex-col bg-zinc-50 dark:bg-zinc-900/80 overflow-y-auto">
+      <div className="flex-1 flex flex-col bg-black/20 overflow-y-auto">
         {/* --- HEADER (NEW) --- */}
-        <header className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800 md:hidden">
+        <header className="flex items-center justify-between p-4 border-b border-white/20 bg-white/10 backdrop-blur-lg md:hidden">
           <button onClick={() => setIsSidebarOpen(true)}>
             <Menu size={24} />
           </button>
           <span className="font-semibold text-lg">BSCS-A Portal</span>
         </header>
 
-        <main className="flex-1 p-4">{children}</main>
+        <main className="flex-1 p-4">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </div>
 
       {/* --- OVERLAY (NEW) --- */}

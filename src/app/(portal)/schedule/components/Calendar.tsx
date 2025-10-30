@@ -14,6 +14,8 @@ import { enUS } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { createEvent, updateEvent, deleteEvent } from '../actions'
 import { X, Trash2, AlertCircle } from 'lucide-react'
+import eventBus from '@/lib/eventBus'
+import { fetchEvents } from '../actions'
 
 // Setup remains the same
 const locales = { 'en-US': enUS }
@@ -65,8 +67,9 @@ const eventsReducer = (state: MyEventType[], action: OptimisticAction): MyEventT
 
 
 export default function Calendar({ initialEvents }: { initialEvents: MyEventType[] }) {
+  const [events, setEvents] = useState<MyEventType[]>(initialEvents)
   const [optimisticEvents, dispatchOptimisticEvent] = useOptimistic(
-    initialEvents,
+    events,
     eventsReducer
   )
   const [selectedSlot, setSelectedSlot] = useState<SlotInfo | null>(null)
@@ -80,13 +83,17 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
 
   // --- ADDED useEffect FOR DEBUGGING ---
   useEffect(() => {
-    console.log("Calendar Component Mounted (Effect)");
-    // Cleanup function: Log when component unmounts
+    const handleCourseChange = async () => {
+      const newEvents = await fetchEvents()
+      setEvents(newEvents)
+    }
+
+    eventBus.on('course-changed', handleCourseChange)
+
     return () => {
-      console.log("Calendar Component Unmounted (Effect)");
-    };
-  }, []); // Empty dependency array means this runs only on mount and unmount
-  // --- END OF ADDED useEffect ---
+      eventBus.off('course-changed', handleCourseChange)
+    }
+  }, [])
 
   const handleSelectSlot = useCallback((slotInfo: SlotInfo) => {
     setSelectedSlot(slotInfo)
@@ -219,8 +226,8 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
 
   return (
     <div className="flex flex-col gap-8 relative">
-{/* --- Calendar Display --- */}
-      <div className="w-full min-h-[70vh] rounded-lg"> {/* Removed bg/border inherit */}
+      {/* --- Calendar Display --- */}
+      <div className="w-full min-h-[70vh] rounded-lg bg-white/10 border border-white/20 backdrop-blur-lg p-4">
         <BigCalendar
           localizer={localizer}
           events={optimisticEvents.map(e => ({...e, id: String(e.id)}))}
