@@ -66,8 +66,8 @@ export async function fetchEvents() {
   }))
 }
 
-// --- FETCH TODAY'S EVENTS ---
-export async function fetchTodaysEvents() {
+// --- FETCH EVENTS FOR A SPECIFIC DATE ---
+export async function fetchEventsForDate(dateString: string) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -76,16 +76,17 @@ export async function fetchTodaysEvents() {
     return []
   }
 
-  const now = new Date()
+  // Use the provided date string to create date objects
+  const targetDate = new Date(dateString)
   const startOfDay = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
+    targetDate.getFullYear(),
+    targetDate.getMonth(),
+    targetDate.getDate(),
   ).toISOString()
   const endOfDay = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() + 1,
+    targetDate.getFullYear(),
+    targetDate.getMonth(),
+    targetDate.getDate() + 1,
   ).toISOString()
 
   const { data: events, error } = await supabase
@@ -97,7 +98,7 @@ export async function fetchTodaysEvents() {
     .order('start_time', { ascending: true })
 
   if (error) {
-    console.error("Error fetching today's events:", error)
+    console.error('Error fetching events for date:', error)
     return []
   }
 
