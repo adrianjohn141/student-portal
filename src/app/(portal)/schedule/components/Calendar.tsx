@@ -1,6 +1,5 @@
 'use client'
 
-// Add useEffect back to imports
 import { useState, startTransition, useOptimistic, useCallback, useRef, useEffect } from 'react'
 import {
   Calendar as BigCalendar,
@@ -8,18 +7,28 @@ import {
   SlotInfo,
   Event as CalendarEvent,
   View,
-} from 'react-big-calendar'
-import { format, parse, startOfWeek, getDay } from 'date-fns'
+  } from 'react-big-calendar'
+import { parse, startOfWeek, getDay } from 'date-fns'
+import type { Locale } from 'date-fns'
 import { enUS } from 'date-fns/locale'
+import { formatInTimeZone } from 'date-fns-tz'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { createEvent, updateEvent, deleteEvent } from '../actions'
 import { X, Trash2, AlertCircle } from 'lucide-react'
 import eventBus from '@/lib/eventBus'
 import { fetchEvents } from '../actions'
 
-// Setup remains the same
+// --- TIMEZONE SETUP ---
+const timeZone = 'Asia/Manila'
 const locales = { 'en-US': enUS }
-const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
+const localizer = dateFnsLocalizer({
+  format: (date: Date, formatStr: string, options?: { locale?: Locale }) =>
+    formatInTimeZone(date, timeZone, formatStr, options),
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+})
 
 // Ensure MyEventType matches exactly what fetchEvents returns AFTER mapping
 interface MyEventType {
@@ -29,18 +38,16 @@ interface MyEventType {
   end: Date
 }
 
-// Helper function to format Date for input[type=datetime-local]
+// Helper function to format Date for input[type=datetime-local] in Asia/Manila timezone
 const formatForInput = (date: Date): string => {
-   try {
-    const timezoneOffset = date.getTimezoneOffset() * 60000;
-    const localISOTime = new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16);
-    return localISOTime;
+  try {
+    // Format the UTC date from the server into the 'YYYY-MM-DDTHH:mm' string
+    // that the input expects, interpreted in the 'Asia/Manila' timezone.
+    return formatInTimeZone(date, timeZone, "yyyy-MM-dd'T'HH:mm")
   } catch (e) {
     console.error('Error formatting date:', e)
-    const now = new Date();
-    const timezoneOffset = now.getTimezoneOffset() * 60000;
-    const localISOTime = new Date(now.getTime() - timezoneOffset).toISOString().slice(0, 16);
-    return localISOTime;
+    // Fallback to the current time in the target timezone
+    return formatInTimeZone(new Date(), timeZone, "yyyy-MM-dd'T'HH:mm")
   }
 }
 
@@ -154,8 +161,11 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
     })
     const serverFormData = new FormData()
     serverFormData.append('title', title)
-    serverFormData.append('start_time', new Date(start_time).toISOString())
-    serverFormData.append('end_time', new Date(end_time).toISOString())
+    // Convert the form's local datetime string (assumed to be in Asia/Manila) to a UTC ISO string for the server
+    // HACK: Hardcoding UTC+8 offset for Asia/Manila since zonedTimeToUtc is causing issues.
+    // This is not robust for timezones with DST, but should be fine for the Philippines.
+    serverFormData.append('start_time', new Date(`${start_time}:00+08:00`).toISOString())
+    serverFormData.append('end_time', new Date(`${end_time}:00+08:00`).toISOString())
     const result = await createEvent(serverFormData)
     console.log("Create Event Result:", result);
     if (result?.error) {
@@ -185,8 +195,11 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
     const serverFormData = new FormData()
     serverFormData.append('id', id)
     serverFormData.append('title', title)
-    serverFormData.append('start_time', new Date(start_time).toISOString())
-    serverFormData.append('end_time', new Date(end_time).toISOString())
+    // Convert the form's local datetime string (assumed to be in Asia/Manila) to a UTC ISO string for the server
+    // HACK: Hardcoding UTC+8 offset for Asia/Manila since zonedTimeToUtc is causing issues.
+    // This is not robust for timezones with DST, but should be fine for the Philippines.
+    serverFormData.append('start_time', new Date(`${start_time}:00+08:00`).toISOString())
+    serverFormData.append('end_time', new Date(`${end_time}:00+08:00`).toISOString())
     const result = await updateEvent(serverFormData);
     console.log("Update Event Result:", result);
     if (result?.error) {

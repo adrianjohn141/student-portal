@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { fetchEventsForDate } from '../schedule/actions'
+import { formatInTimeZone } from 'date-fns-tz'
 
 type Event = {
   id: string
@@ -40,11 +41,7 @@ export default function TodaysClasses() {
   }, [])
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    })
+    return formatInTimeZone(date, 'Asia/Manila', 'h:mm a')
   }
 
   if (isLoading) {
