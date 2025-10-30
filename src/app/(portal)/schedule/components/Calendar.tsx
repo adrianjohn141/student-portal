@@ -229,7 +229,8 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
           selectable
           onSelectSlot={handleSelectSlot}
           onSelectEvent={(event) => handleSelectEvent(event as MyEventType)}
-          style={{ height: '80vh' }}
+          style={{ height: '90vh' }}
+          popup
           view={view}
           date={date}
           onView={(view) => setView(view)}

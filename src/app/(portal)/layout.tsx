@@ -43,7 +43,7 @@ export default async function PortalLayout({
   return (
     <div className="flex w-full min-h-screen">
       {/* --- SIDEBAR --- */}
-      <aside className="w-45 flex flex-col p-4 border-r border-zinc-800 bg-zinc-900/50">
+      <aside className="w-48 flex flex-col p-4 border-r border-zinc-800 bg-zinc-900/50">
         <div className="flex-1 flex flex-col gap-2">
           <span className="font-semibold text-lg mb-4">BSCS-A Portal</span>
 
