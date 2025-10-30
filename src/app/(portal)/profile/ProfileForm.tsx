@@ -1,6 +1,7 @@
 'use client'
 
-import { useFormState, useFormStatus } from 'react-dom'
+import { useActionState } from 'react'
+import { useFormStatus } from 'react-dom'
 import { updateprofile, FormState } from './actions'
 
 function SubmitButton() {
@@ -25,7 +26,7 @@ export function ProfileForm({
   fullName: string
 }) {
   const initialState: FormState = { message: '', errors: {} }
-  const [state, dispatch] = useFormState(updateprofile, initialState)
+  const [state, dispatch] = useActionState(updateprofile, initialState)
 
   return (
     <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg max-w-lg mx-auto">

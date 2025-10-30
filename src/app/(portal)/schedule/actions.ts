@@ -66,6 +66,49 @@ export async function fetchEvents() {
   }))
 }
 
+// --- FETCH TODAY'S EVENTS ---
+export async function fetchTodaysEvents() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return []
+  }
+
+  const now = new Date()
+  const startOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).toISOString()
+  const endOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1,
+  ).toISOString()
+
+  const { data: events, error } = await supabase
+    .from('events')
+    .select('id, title, start_time, end_time')
+    .eq('user_id', user.id)
+    .gte('start_time', startOfDay)
+    .lt('start_time', endOfDay)
+    .order('start_time', { ascending: true })
+
+  if (error) {
+    console.error("Error fetching today's events:", error)
+    return []
+  }
+
+  return events.map((event) => ({
+    ...event,
+    id: String(event.id),
+    start: new Date(event.start_time),
+    end: new Date(event.end_time),
+  }))
+}
+
 
 // --- UPDATE EVENT ---
 const UpdateEventSchema = z.object({
