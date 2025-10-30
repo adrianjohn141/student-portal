@@ -4,13 +4,21 @@ import { login } from './actions'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginMessage() {
   const searchParams = useSearchParams()
   const message = searchParams.get('message')
 
+  return message ? (
+    <div className="rounded-md border border-zinc-600 bg-zinc-900/50 px-4 py-3 text-center text-sm text-white">
+      {message}
+    </div>
+  ) : null
+}
+
+export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen w-screen flex-col items-center justify-center">
       <div
@@ -19,11 +27,9 @@ export default function LoginPage() {
       />
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col justify-center space-y-6 rounded-lg bg-black/30 p-8 shadow-lg">
-        {message && (
-          <div className="rounded-md border border-zinc-600 bg-zinc-900/50 px-4 py-3 text-center text-sm text-white">
-            {message}
-          </div>
-        )}
+        <Suspense fallback={null}>
+          <LoginMessage />
+        </Suspense>
         <div className="flex flex-col items-center space-y-2 text-center">
           <Image src="/globe.svg" alt="Globe Icon" width={48} height={48} />
           <h1 className="text-2xl font-semibold tracking-tight text-white">
