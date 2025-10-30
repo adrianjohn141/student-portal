@@ -16,6 +16,9 @@ export async function login(formData: FormData) {
 
   if (error) {
     console.error(error)
+    if (error.message.includes('Invalid login credentials')) {
+      return redirect('/login?message=Invalid email or password')
+    }
     return redirect('/login?message=Could not authenticate user')
   }
 
