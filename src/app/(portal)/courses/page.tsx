@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Book, PlusCircle, MinusCircle, Clock } from "lucide-react"
 import { format, parse } from "date-fns"
+import { formatInTimeZone } from "date-fns-tz"
 import { motion, AnimatePresence } from "framer-motion"
 import type { User } from "@supabase/supabase-js"
 import eventBus from "@/lib/eventBus"
@@ -21,8 +22,11 @@ type Course = {
 function formatClassTime(timeString: string | null): string | null {
   if (!timeString) return null
   try {
-    const time = parse(timeString, "HH:mm:ss", new Date())
-    return format(time, "h:mm a")
+    // The time from the DB is just "HH:mm:ss". We need to parse it into a date object.
+    // We'll use a dummy date (like the Unix epoch) since the date part is irrelevant.
+    const time = parse(timeString, "HH:mm:ss", new Date(0))
+    // Now, format that time in the 'Asia/Manila' timezone.
+    return formatInTimeZone(time, "Asia/Manila", "h:mm a")
   } catch (e) {
     console.error("Error formatting time:", e)
     return timeString

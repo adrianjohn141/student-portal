@@ -2,14 +2,16 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { startOfWeek, addDays, getDay } from "date-fns"
+import { startOfWeek, addDays, getDay, format } from "date-fns"
 
-// Helper function to combine date and time
+// Helper function to combine date and time, creating a UTC ISO string from Asia/Manila time
 function combineDateAndTime(date: Date, timeString: string): string {
-  const [hours, minutes, seconds] = timeString.split(":").map(Number)
-  let newDate = new Date(date)
-  newDate.setHours(hours, minutes, seconds, 0)
-  return newDate.toISOString()
+  // Format the date part into YYYY-MM-DD
+  const datePart = format(date, "yyyy-MM-dd")
+  // Combine with the time string and the explicit UTC+8 offset for the Philippines
+  const isoStringWithOffset = `${datePart}T${timeString}+08:00`
+  // Create a new Date object from the ISO string. This will be correctly interpreted as UTC.
+  return new Date(isoStringWithOffset).toISOString()
 }
 
 const EnrollSchema = z.object({

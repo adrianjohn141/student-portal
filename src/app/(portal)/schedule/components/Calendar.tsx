@@ -153,8 +153,9 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
     const newEventData = {
       id: `optimistic-${Date.now()}`, // Use temp ID
       title,
-      start: new Date(start_time),
-      end: new Date(end_time),
+      // When creating a new event for optimistic update, ensure the date is created in the correct timezone context
+      start: new Date(`${start_time}:00+08:00`),
+      end: new Date(`${end_time}:00+08:00`),
     }
     startTransition(() => {
       dispatchOptimisticEvent({ type: 'ADD', payload: newEventData })
@@ -188,7 +189,7 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
         setError("Invalid data for update.");
         return;
     }
-    const updatedEventData = { id, title, start: new Date(start_time), end: new Date(end_time), }
+    const updatedEventData = { id, title, start: new Date(`${start_time}:00+08:00`), end: new Date(`${end_time}:00+08:00`), }
     startTransition(() => {
       dispatchOptimisticEvent({ type: 'UPDATE', payload: updatedEventData })
     })
