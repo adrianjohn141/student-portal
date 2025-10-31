@@ -42,7 +42,7 @@ export async function signup(formData: FormData) {
   if (user) {
     const { error: profileError } = await supabase
       .from('profiles')
-      .insert({ id: user.id, full_name: fullName, email: email })
+      .upsert({ id: user.id, full_name: fullName })
     if (profileError) {
       console.error(profileError)
       return redirect('/signup?message=Could not create user profile')
