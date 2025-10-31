@@ -222,14 +222,6 @@ body {
     font-size: 0.75rem !important;
   }
 
-  /* Make day names shorter */
-  .rbc-header span {
-    font-size: 0 !important; /* Hide full day name */
-  }
-  .rbc-header span::before {
-    font-size: 0.75rem !important; /* Show abbreviated day name */
-    content: attr(aria-label);
-  }
 
   /* Date cell adjustments */
   .rbc-date-cell {
@@ -245,7 +237,7 @@ body {
 
   /* Time grid adjustments */
   .rbc-time-gutter, .rbc-time-header-gutter {
-    display: none !important; /* Hide the time gutter */
+    min-width: 45px !important; /* Ensure gutter has a minimum width */
   }
   .rbc-time-slot {
     font-size: 0.625rem !important;

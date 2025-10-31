@@ -48,9 +48,11 @@ export default function TodaysClasses() {
     return <p className="text-zinc-400">Loading classes...</p>
   }
 
+  const dayName = formatInTimeZone(new Date(), 'Asia/Manila', 'EEEE')
+
   return (
     <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Today's Classes</h2>
+      <h2 className="text-xl font-semibold mb-4">{dayName}'s Classes</h2>
       {events.length > 0 ? (
         <ul className="space-y-4">
           {events.map((event) => (

@@ -24,7 +24,7 @@ export default async function PortalLayout({
     .single()
 
   return (
-    <div className="flex w-full h-screen relative">
+    <div className="md:flex w-full h-screen relative">
       <PortalNavigation user={user} profile={profile} />
 
       <div className="flex-1 flex flex-col bg-black/20 overflow-y-auto">
