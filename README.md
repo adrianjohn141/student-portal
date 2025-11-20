@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BSCS-A Student Portal
 
-## Getting Started
+A comprehensive student portal application built with Next.js 16 and Supabase, designed for BSCS-A students to manage their academic life. This portal allows students to view their schedule, manage course enrollments, and update their profiles.
 
-First, run the development server:
+## 🚀 Tech Stack
+
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Animations:** [Framer Motion](https://www.framer.com/motion/)
+- **Database & Auth:** [Supabase](https://supabase.com/)
+- **Calendar:** [React Big Calendar](https://github.com/jquense/react-big-calendar)
+- **Date Handling:** [date-fns](https://date-fns.org/)
+- **Icons:** [Lucide React](https://lucide.dev/)
+
+## ✨ Features
+
+### 🔐 Authentication & Security
+- **Secure Login/Signup:** Email and password authentication via Supabase.
+- **Student Verification:** Intended for students with valid institutional emails (`psu.edu.ph`).
+- **Protected Routes:** Middleware-protected portal access.
+
+### 📚 Course Management
+- **Browse Courses:** View list of available courses.
+- **Enrollment:** One-click enrollment in open courses.
+- **My Courses:** View detailed list of currently enrolled courses including instructor and schedule.
+- **Unenroll:** Option to withdraw from courses.
+
+### 📅 Schedule & Calendar
+- **Interactive Calendar:** Visual representation of class schedules.
+- **Today's Classes:** Quick view of daily schedule on the dashboard.
+- **Timezone Support:** Proper handling of class times (Asia/Manila).
+
+### 👤 User Profile & Settings
+- **Profile Management:** View and update personal information (Full Name).
+- **Account Settings:** Secure password change functionality.
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- Node.js 18+ installed
+- A Supabase project created
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory and add your Supabase credentials:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/adrianjohn141/student-portal.git
+   cd student-portal
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   # or
+   bun install
+   ```
 
-## Learn More
+3. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. **Open your browser:**
+   Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📂 Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+student-portal/
+├── public/              # Static assets
+├── src/
+│   ├── app/             # Next.js App Router pages
+│   │   ├── (portal)/    # Protected portal routes (Dashboard, Courses, Schedule, etc.)
+│   │   ├── api/         # API Routes (Enroll/Unenroll)
+│   │   ├── login/       # Login page
+│   │   ├── signup/      # Signup page
+│   │   └── ...
+│   ├── components/      # Reusable UI components
+│   ├── lib/             # Utilities (Supabase client, EventBus)
+│   └── ...
+└── ...
+```
 
-## Deploy on Vercel
+## 🗄️ Database Schema
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The application relies on the following Supabase tables:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **`profiles`**: User profile information linked to `auth.users`.
+- **`courses`**: Catalog of available courses with schedule details.
+- **`student_courses`**: Junction table tracking student enrollments.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is for educational purposes.

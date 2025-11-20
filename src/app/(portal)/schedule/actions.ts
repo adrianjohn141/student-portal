@@ -3,7 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { z } from 'zod' // Make sure you run: npm install zod
+import { z } from 'zod'
+import { startOfWeek, addDays, getDay, parse, set, formatISO } from 'date-fns'
 
 // --- CREATE EVENT ---
 export async function createEvent(formData: FormData) {
@@ -42,28 +43,120 @@ export async function createEvent(formData: FormData) {
 // --- FETCH EVENTS ---
 export async function fetchEvents() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser() // Corrected variable name
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    return [] // Return empty array if no user
+    return []
   }
 
-  const { data: events, error } = await supabase
+  // 1. Fetch Custom Events (from 'events' table)
+  const { data: customEvents, error: customError } = await supabase
     .from('events')
     .select('id, title, start_time, end_time')
     .eq('user_id', user.id)
 
-  if (error) {
-    console.error('Error fetching events:', error)
-    return []
+  if (customError) {
+    console.error('Error fetching custom events:', customError)
   }
 
-  // Convert event times to Date objects for the calendar
-  return events.map((event) => ({
+  const formattedCustomEvents = (customEvents || []).map((event) => ({
     ...event,
-    id: String(event.id), // Ensure id is a string for calendar
+    id: String(event.id),
     start: new Date(event.start_time),
     end: new Date(event.end_time),
+    isCourseEvent: false,
   }))
+
+  // 2. Fetch Enrolled Courses
+  const { data: enrolledCourses, error: coursesError } = await supabase
+    .from('student_courses')
+    .select(`
+      course:courses (
+        id,
+        course_name,
+        class_start_time,
+        class_end_time,
+        meets_monday,
+        meets_tuesday,
+        meets_wednesday,
+        meets_thursday,
+        meets_friday,
+        meets_saturday,
+        meets_sunday
+      )
+    `)
+    .eq('student_id', user.id)
+
+  if (coursesError) {
+    console.error('Error fetching enrolled courses:', coursesError)
+    // Return just custom events if courses fail
+    return formattedCustomEvents
+  }
+
+  // 3. Generate Course Events (Dynamic Projection)
+  const courseEvents = []
+  
+  // Define range for generation: Current year +/- 1 year (or just current year context)
+  // For simplicity, let's generate for 6 months back and 6 months forward from today.
+  const now = new Date()
+  const startDate = addDays(now, -180) // 6 months ago
+  const endDate = addDays(now, 180)   // 6 months future
+  
+  // Helper to parse time string "HH:mm" or "HH:mm:ss"
+  const parseTime = (timeStr: string, baseDate: Date) => {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return set(baseDate, { hours, minutes, seconds: 0, milliseconds: 0 });
+  }
+
+  for (const item of enrolledCourses) {
+    // Type guard / check if course exists
+    const course = Array.isArray(item.course) ? item.course[0] : item.course;
+    if (!course) continue;
+
+    const meetingDays = [
+      course.meets_sunday,
+      course.meets_monday,
+      course.meets_tuesday,
+      course.meets_wednesday,
+      course.meets_thursday,
+      course.meets_friday,
+      course.meets_saturday,
+    ]
+
+    // Iterate through dates in the range
+    let current = new Date(startDate)
+    // Normalize to start of day to avoid drift
+    current.setHours(0,0,0,0)
+
+    while (current <= endDate) {
+      const dayOfWeek = getDay(current)
+      
+      if (meetingDays[dayOfWeek]) {
+        try {
+            const start = parseTime(course.class_start_time, current)
+            const end = parseTime(course.class_end_time, current)
+            
+            // Create a unique ID for this instance
+            // Format: course-[id]-[date]
+            const instanceId = `course-${course.id}-${formatISO(current, { representation: 'date' })}`
+
+            courseEvents.push({
+                id: instanceId,
+                title: course.course_name,
+                start: start,
+                end: end,
+                isCourseEvent: true,
+                courseId: course.id // Keep reference
+            })
+        } catch (e) {
+            console.error('Error generating event for course', course.id, e)
+        }
+      }
+      // Next day
+      current = addDays(current, 1)
+    }
+  }
+
+  return [...formattedCustomEvents, ...courseEvents]
 }
 
 // --- FETCH EVENTS FOR A SPECIFIC DATE ---
@@ -89,6 +182,7 @@ export async function fetchEventsForDate(dateString: string) {
     targetDate.getDate() + 1,
   ).toISOString()
 
+  // 1. Fetch Custom Events
   const { data: events, error } = await supabase
     .from('events')
     .select('id, title, start_time, end_time')
@@ -99,15 +193,93 @@ export async function fetchEventsForDate(dateString: string) {
 
   if (error) {
     console.error('Error fetching events for date:', error)
-    return []
   }
 
-  return events.map((event) => ({
+  const formattedCustomEvents = (events || []).map((event) => ({
     ...event,
     id: String(event.id),
     start: new Date(event.start_time),
     end: new Date(event.end_time),
+    isCourseEvent: false,
   }))
+
+  // 2. Fetch Enrolled Courses
+  const { data: enrolledCourses, error: coursesError } = await supabase
+    .from('student_courses')
+    .select(`
+      course:courses (
+        id,
+        course_name,
+        class_start_time,
+        class_end_time,
+        meets_monday,
+        meets_tuesday,
+        meets_wednesday,
+        meets_thursday,
+        meets_friday,
+        meets_saturday,
+        meets_sunday
+      )
+    `)
+    .eq('student_id', user.id)
+
+  if (coursesError) {
+    console.error('Error fetching enrolled courses for date:', coursesError)
+    return formattedCustomEvents
+  }
+
+  // 3. Generate Course Events for this specific date
+  const courseEvents = []
+  
+  // Helper to parse time string "HH:mm" or "HH:mm:ss"
+  const parseTime = (timeStr: string, baseDate: Date) => {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return set(baseDate, { hours, minutes, seconds: 0, milliseconds: 0 });
+  }
+
+  const dayOfWeek = getDay(targetDate)
+
+  for (const item of enrolledCourses) {
+    const course = Array.isArray(item.course) ? item.course[0] : item.course;
+    if (!course) continue;
+
+    const meetingDays = [
+      course.meets_sunday,
+      course.meets_monday,
+      course.meets_tuesday,
+      course.meets_wednesday,
+      course.meets_thursday,
+      course.meets_friday,
+      course.meets_saturday,
+    ]
+
+    if (meetingDays[dayOfWeek]) {
+      try {
+        const start = parseTime(course.class_start_time, targetDate)
+        const end = parseTime(course.class_end_time, targetDate)
+        
+        // Create a unique ID
+        const instanceId = `course-${course.id}-${formatISO(targetDate, { representation: 'date' })}`
+
+        courseEvents.push({
+            id: instanceId,
+            title: course.course_name,
+            start: start,
+            end: end,
+            isCourseEvent: true,
+            courseId: course.id
+        })
+      } catch (e) {
+        console.error('Error generating event for course', course.id, e)
+      }
+    }
+  }
+
+  // Combine and sort
+  const allEvents = [...formattedCustomEvents, ...courseEvents]
+  allEvents.sort((a, b) => a.start.getTime() - b.start.getTime())
+
+  return allEvents
 }
 
 

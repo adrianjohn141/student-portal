@@ -25,8 +25,8 @@ export default function LoginPage() {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('/background.jpg')" }}
       />
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-      <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col justify-center space-y-6 rounded-lg bg-black/30 p-8 shadow-lg">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      <div className="relative z-10 mx-auto flex w-full max-w-sm flex-col justify-center space-y-6 rounded-xl bg-white/10 border border-white/20 backdrop-blur-lg p-8 shadow-2xl">
         <Suspense fallback={null}>
           <LoginMessage />
         </Suspense>
@@ -58,7 +58,7 @@ function LoginForm() {
           Email
         </label>
         <input
-          className="rounded-md px-4 py-2 bg-inherit border border-zinc-600 text-white placeholder-zinc-400"
+          className="rounded-md px-4 py-2 bg-black/20 border border-white/10 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors hover:bg-black/30"
           id="email"
           name="email"
           placeholder="you@example.edu"
@@ -72,7 +72,7 @@ function LoginForm() {
         </label>
         <div className="relative">
           <input
-            className="w-full rounded-md px-4 py-2 bg-inherit border border-zinc-600 text-white placeholder-zinc-400"
+            className="w-full rounded-md px-4 py-2 bg-black/20 border border-white/10 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors hover:bg-black/30"
             id="password"
             name="password"
             placeholder="••••••••"

@@ -36,6 +36,7 @@ interface MyEventType {
   title: string
   start: Date
   end: Date
+  isCourseEvent?: boolean
 }
 
 // Helper function to format Date for input[type=datetime-local] in Asia/Manila timezone
@@ -82,7 +83,7 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
   const [selectedSlot, setSelectedSlot] = useState<SlotInfo | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<MyEventType | null>(null)
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const [error, setError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [view, setView] = useState<View>('month');
@@ -120,7 +121,8 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
     }
     setSelectedEvent(event)
     setSelectedSlot(null)
-    setModalMode('edit')
+    // If it is a course event, set mode to 'view' (read-only)
+    setModalMode(event.isCourseEvent ? 'view' : 'edit')
     setError(null);
     setIsModalOpen(true)
   }, [])
@@ -234,9 +236,35 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
     }
   }
 
-  const formAction = modalMode === 'edit' ? handleUpdateEvent : handleCreateEvent;
-  const modalTitle = modalMode === 'edit' ? 'Edit Event' : 'Add New Event';
+  const formAction = modalMode === 'edit' ? handleUpdateEvent : handleCreateEvent; // Default to create for view mode too, though disabled
+  let modalTitle = 'Add New Event';
+  if (modalMode === 'edit') modalTitle = 'Edit Event';
+  if (modalMode === 'view') modalTitle = 'Course Event Details';
+  
   const submitButtonText = modalMode === 'edit' ? 'Update Event' : 'Create Event';
+
+  // Custom Event Style Getter to color code course events
+  const eventPropGetter = useCallback(
+    (event: MyEventType) => {
+      if (event.isCourseEvent) {
+        return {
+          style: {
+            backgroundColor: '#43037eff', // Violet-600 for courses (matches theme)
+            borderColor: '#8f00a1ff', // Violet-700
+            color: '#ffffffff',
+          },
+        }
+      }
+      return {
+        style: {
+           backgroundColor: '#0d9488', // Teal-600 for custom events
+           borderColor: '#0f766e', // Teal-700
+           color: '#ffffff',
+        }
+      }
+    },
+    []
+  )
 
   return (
     <div className="flex flex-col gap-8 relative">
@@ -251,6 +279,7 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
           onSelectSlot={handleSelectSlot}
           onSelectEvent={(event) => handleSelectEvent(event as MyEventType)}
           style={{ height: '90vh' }}
+          eventPropGetter={eventPropGetter}
           popup
           view={view}
           date={date}
@@ -266,17 +295,17 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
           onClick={handleCancel}
         >
           <div
-            className="bg-zinc-900 border border-zinc-700 p-6 rounded-lg w-full max-w-md relative shadow-xl"
+            className="bg-black/40 border border-white/20 backdrop-blur-xl p-6 rounded-xl w-full max-w-md relative shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={handleCancel}
-              className="absolute top-3 right-3 p-1 rounded-full text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100 transition-colors"
+              className="absolute top-3 right-3 p-1 rounded-full text-zinc-400 hover:bg-white/10 hover:text-white transition-colors"
               aria-label="Close modal"
             >
               <X size={20} />
             </button>
-            <h2 className="text-xl font-semibold mb-6 text-center text-zinc-100">{modalTitle}</h2>
+            <h2 className="text-xl font-semibold mb-6 text-center text-white">{modalTitle}</h2>
 
              {/* ERROR DISPLAY */}
             {error && (
@@ -285,13 +314,19 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
                 <span>{error}</span>
               </div>
             )}
+            
+            {modalMode === 'view' && (
+               <div className="mb-4 p-3 bg-blue-900/40 border border-blue-700 text-blue-100 text-sm rounded-md">
+                  This event is part of your enrolled course schedule and cannot be edited here.
+               </div>
+            )}
 
             <form
               ref={formRef}
               action={formAction}
               className="flex flex-col gap-4"
             >
-              {modalMode === 'edit' && selectedEvent && (
+              {(modalMode === 'edit' || modalMode === 'view') && selectedEvent && (
                 <input type="hidden" name="id" value={selectedEvent.id} />
               )}
               {/* Form fields remain the same */}
@@ -304,8 +339,11 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
                   id="title"
                   name="title"
                   required
-                  defaultValue={modalMode === 'edit' ? selectedEvent?.title : ''}
-                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-600 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={modalMode === 'view'}
+                  defaultValue={
+                    (modalMode === 'edit' || modalMode === 'view') ? selectedEvent?.title : ''
+                  }
+                  className="w-full px-3 py-2 rounded-md bg-black/20 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors hover:bg-black/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
@@ -317,12 +355,13 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
                   id="start_time"
                   name="start_time"
                   required
+                  disabled={modalMode === 'view'}
                   // Ensure selectedEvent/Slot exist before accessing start/end
                   defaultValue={formatForInput(
-                      modalMode === 'edit' && selectedEvent ? selectedEvent.start :
+                      (modalMode === 'edit' || modalMode === 'view') && selectedEvent ? selectedEvent.start :
                       selectedSlot ? selectedSlot.start : new Date() // Fallback added
                   )}
-                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-600 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 calendar-input"
+                  className="w-full px-3 py-2 rounded-md bg-black/20 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 calendar-input transition-colors hover:bg-black/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
@@ -334,11 +373,12 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
                   id="end_time"
                   name="end_time"
                   required
+                  disabled={modalMode === 'view'}
                   defaultValue={formatForInput(
-                      modalMode === 'edit' && selectedEvent ? selectedEvent.end :
+                      (modalMode === 'edit' || modalMode === 'view') && selectedEvent ? selectedEvent.end :
                       selectedSlot ? selectedSlot.end : new Date() // Fallback added
                   )}
-                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-600 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 calendar-input"
+                  className="w-full px-3 py-2 rounded-md bg-black/20 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 calendar-input transition-colors hover:bg-black/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               {/* Buttons remain the same */}
@@ -353,12 +393,23 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
                     <Trash2 size={16}/> Delete
                   </button>
                  )}
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-medium transition-colors"
-                >
-                  {submitButtonText}
-                </button>
+                 {modalMode !== 'view' && (
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-medium transition-colors"
+                  >
+                    {submitButtonText}
+                  </button>
+                 )}
+                 {modalMode === 'view' && (
+                   <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="px-4 py-2 bg-zinc-600 hover:bg-zinc-700 rounded-md text-white font-medium transition-colors"
+                   >
+                     Close
+                   </button>
+                 )}
               </div>
             </form>
           </div>

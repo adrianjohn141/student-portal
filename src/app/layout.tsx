@@ -4,6 +4,7 @@ import './globals.css'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Toaster } from 'sonner'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,6 +26,7 @@ export default function RootLayout({
         </div>
         <Analytics />
         <SpeedInsights />
+        <Toaster position="bottom-right" theme="dark" />
       </body>
     </html>
   )

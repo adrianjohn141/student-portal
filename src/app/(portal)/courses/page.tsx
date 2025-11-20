@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Book, PlusCircle, MinusCircle, Clock } from "lucide-react"
+import { Book, PlusCircle, MinusCircle, Clock, Ghost, SearchX } from "lucide-react"
 import { format, parse } from "date-fns"
 import { formatInTimeZone } from "date-fns-tz"
 import { motion, AnimatePresence } from "framer-motion"
 import type { User } from "@supabase/supabase-js"
 import eventBus from "@/lib/eventBus"
+import { toast } from "sonner"
+import { Skeleton } from "@/components/Skeleton"
 
 type Course = {
   id: number
@@ -37,7 +39,6 @@ export default function HomePage() {
   const [user, setUser] = useState<User | null>(null)
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([])
   const [availableCourses, setAvailableCourses] = useState<Course[]>([])
-  const [message, setMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -45,7 +46,7 @@ export default function HomePage() {
   useEffect(() => {
     const successMessage = searchParams.get("message")
     if (successMessage) {
-      setMessage(successMessage)
+      toast.success(successMessage)
     }
   }, [searchParams])
 
@@ -114,12 +115,13 @@ export default function HomePage() {
     })
 
     const result = await response.json()
-    setMessage(result.message)
 
     if (!response.ok) {
+      toast.error(result.message)
       setEnrolledCourses(prev => prev.filter(c => c.id !== course.id))
       setAvailableCourses(prev => [...prev, course].sort((a, b) => (a.course_code || "").localeCompare(b.course_code || "")))
     } else {
+      toast.success(result.message)
       eventBus.emit("course-changed")
     }
   }
@@ -135,35 +137,43 @@ export default function HomePage() {
     })
 
     const result = await response.json()
-    setMessage(result.message)
 
     if (!response.ok) {
+      toast.error(result.message)
       setAvailableCourses(prev => prev.filter(c => c.id !== course.id))
       setEnrolledCourses(prev => [...prev, course].sort((a, b) => (a.course_code || "").localeCompare(b.course_code || "")))
     } else {
+      toast.success(result.message)
       eventBus.emit("course-changed")
     }
   }
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <div className="flex flex-col gap-8">
+        <h1 className="text-3xl font-bold">My Courses</h1>
+        <section>
+          <Skeleton className="h-8 w-48 mb-4 bg-white/5" />
+          <div className="flex flex-col gap-4">
+            <Skeleton className="h-24 w-full bg-white/5" />
+            <Skeleton className="h-24 w-full bg-white/5" />
+          </div>
+        </section>
+        <div className="my-4 border-t border-zinc-700"></div>
+        <section>
+          <Skeleton className="h-8 w-48 mb-4 bg-white/5" />
+          <div className="flex flex-col gap-4">
+            <Skeleton className="h-24 w-full bg-white/5" />
+            <Skeleton className="h-24 w-full bg-white/5" />
+          </div>
+        </section>
+      </div>
+    )
   }
 
   return (
     <div className="flex flex-col gap-8">
       <h1 className="text-3xl font-bold">My Courses</h1>
-
-      {message && (
-        <p
-          className={`mb-4 p-3 rounded-md text-center text-sm ${
-            message.startsWith("Error")
-              ? "bg-red-900 text-red-100"
-              : "bg-green-900 text-green-100"
-          }`}
-        >
-          {message}
-        </p>
-      )}
 
       <section>
         <h2 className="text-2xl font-semibold mb-4 border-b border-zinc-700 pb-2">
@@ -181,9 +191,10 @@ export default function HomePage() {
                 />
               ))
             ) : (
-              <p className="text-zinc-400 text-sm italic">
-                You are not enrolled in any courses yet.
-              </p>
+              <div className="flex flex-col items-center justify-center p-8 text-zinc-400 bg-white/5 rounded-lg border border-white/10">
+                <Ghost size={48} className="mb-2 opacity-50" />
+                <p className="text-sm italic">You are not enrolled in any courses yet.</p>
+              </div>
             )}
           </AnimatePresence>
         </div>
@@ -207,9 +218,10 @@ export default function HomePage() {
                 />
               ))
             ) : (
-              <p className="text-zinc-400 text-sm italic">
-                No other courses available to enroll in.
-              </p>
+              <div className="flex flex-col items-center justify-center p-8 text-zinc-400 bg-white/5 rounded-lg border border-white/10">
+                <SearchX size={48} className="mb-2 opacity-50" />
+                <p className="text-sm italic">No other courses available to enroll in.</p>
+              </div>
             )}
           </AnimatePresence>
         </div>
@@ -241,7 +253,7 @@ function CourseCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={`bg-black/30 border border-white/20 backdrop-blur-lg p-4 rounded-lg flex items-center justify-between gap-4`}
+      className={`bg-white/10 border border-white/20 backdrop-blur-lg p-4 rounded-lg flex items-center justify-between gap-4 shadow-sm hover:bg-white/15 transition-colors`}
     >
       <div className="flex items-center gap-4">
         <div className="p-2 bg-blue-600/20 rounded-lg">

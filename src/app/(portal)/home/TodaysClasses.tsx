@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { fetchEventsForDate } from '../schedule/actions'
 import { formatInTimeZone } from 'date-fns-tz'
+import { Coffee } from 'lucide-react'
+import { Skeleton } from '@/components/Skeleton'
 
 type Event = {
   id: string
@@ -45,30 +47,42 @@ export default function TodaysClasses() {
   }
 
   if (isLoading) {
-    return <p className="text-zinc-400">Loading classes...</p>
+    return (
+      <div className="bg-white/10 backdrop-blur-md border border-white/10 p-6 rounded-xl shadow-lg">
+        <Skeleton className="h-8 w-48 mb-4 bg-white/5" />
+        <div className="space-y-4">
+          <Skeleton className="h-16 w-full bg-white/5" />
+          <Skeleton className="h-16 w-full bg-white/5" />
+        </div>
+      </div>
+    )
   }
 
   const dayName = formatInTimeZone(new Date(), 'Asia/Manila', 'EEEE')
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">{dayName}'s Classes</h2>
+    <div className="bg-white/10 backdrop-blur-md border border-white/10 p-6 rounded-xl shadow-lg">
+      <h2 className="text-xl font-semibold mb-4 text-white">{dayName}'s Classes</h2>
       {events.length > 0 ? (
         <ul className="space-y-4">
           {events.map((event) => (
             <li
               key={event.id}
-              className="flex items-center justify-between p-4 bg-zinc-800 rounded-md"
+              className="flex items-center justify-between p-4 bg-black/20 hover:bg-black/30 transition-colors rounded-lg border border-white/5"
             >
-              <span className="font-medium">{event.title}</span>
-              <span className="text-sm text-zinc-400">
+              <span className="font-medium text-white">{event.title}</span>
+              <span className="text-sm text-zinc-300">
                 {formatTime(event.start)} - {formatTime(event.end)}
               </span>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-zinc-400">You have no classes scheduled for today.</p>
+        <div className="flex flex-col items-center justify-center py-8 text-zinc-400">
+          <Coffee size={48} className="mb-2 opacity-50" />
+          <p className="text-sm italic">You have no classes scheduled for today.</p>
+          <p className="text-xs text-zinc-500 mt-1">Enjoy your free time!</p>
+        </div>
       )}
     </div>
   )

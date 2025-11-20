@@ -57,21 +57,33 @@ export default function PortalNavigation({
           <nav className="flex flex-col gap-2">
             <Link
               href="/home"
-              className="flex items-center gap-3 px-3 py-2 rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                pathname.startsWith('/home')
+                  ? 'bg-white/20 text-white font-medium'
+                  : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+              }`}
             >
               <BookOpen size={18} />
               <span>Home</span>
             </Link>
             <Link
               href="/courses"
-              className="flex items-center gap-3 px-3 py-2 rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                pathname.startsWith('/courses')
+                  ? 'bg-white/20 text-white font-medium'
+                  : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+              }`}
             >
               <BookOpen size={18} />
               <span>My Courses</span>
             </Link>
             <Link
               href="/schedule"
-              className="flex items-center gap-3 px-3 py-2 rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                pathname.startsWith('/schedule')
+                  ? 'bg-white/20 text-white font-medium'
+                  : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+              }`}
             >
               <CalendarDays size={20} />
               <span>Schedule</span>
@@ -83,34 +95,42 @@ export default function PortalNavigation({
         <div className="flex flex-col gap-2">
           <Link
             href="/profile"
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+              pathname.startsWith('/profile')
+                ? 'bg-white/20 text-white font-medium'
+                : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+            }`}
           >
             <UserCircle size={18} />
             <span>profile</span>
           </Link>
           <Link
             href="/settings"
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+              pathname.startsWith('/settings')
+                ? 'bg-white/20 text-white font-medium'
+                : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+            }`}
           >
             <Settings size={18} />
             <span>Settings</span>
           </Link>
 
-          <div className="border-t border-zinc-200 dark:border-zinc-700 my-2"></div>
+          <div className="border-t border-white/20 my-2"></div>
 
           {/* Logout Button */}
           <form action={logout} className="w-full">
-            <button className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-red-400 hover:bg-red-900/50">
+            <button className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-red-400 hover:bg-red-900/30 transition-colors">
               <LogOut size={18} />
               <span>Log Out</span>
             </button>
           </form>
 
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white">
+          <div className="flex items-center gap-3 px-3 py-2 mt-2">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-sm">
               {avatarInitial}
             </div>
-            <span className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
+            <span className="text-sm text-white font-medium truncate">
               {displayName}
             </span>
           </div>
