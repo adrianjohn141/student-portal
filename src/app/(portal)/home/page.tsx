@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import TodaysClasses from './TodaysClasses'
+import UpcomingTasks from './UpcomingTasks'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -19,10 +20,13 @@ export default async function HomePage() {
         Welcome, {profile?.full_name || user?.email || 'Student'}!
       </h1>
       <p className="text-zinc-400 mb-8">
-        Here are your classes scheduled for today.
+        Here is your dashboard overview.
       </p>
 
-      <TodaysClasses />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TodaysClasses />
+        <UpcomingTasks />
+      </div>
     </div>
   )
 }

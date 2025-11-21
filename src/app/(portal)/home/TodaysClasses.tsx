@@ -11,6 +11,8 @@ type Event = {
   title: string
   start: Date
   end: Date
+  courseCode?: string
+  instructor?: string
 }
 
 export default function TodaysClasses() {
@@ -70,8 +72,17 @@ export default function TodaysClasses() {
               key={event.id}
               className="flex items-center justify-between p-4 bg-black/20 hover:bg-black/30 transition-colors rounded-lg border border-white/5"
             >
-              <span className="font-medium text-white">{event.title}</span>
-              <span className="text-sm text-zinc-300">
+              <div className="flex flex-col">
+                <span className="font-medium text-white">{event.title}</span>
+                {(event.courseCode || event.instructor) && (
+                  <span className="text-xs text-zinc-400 mt-1">
+                    {[event.courseCode, event.instructor]
+                      .filter(Boolean)
+                      .join(' • ')}
+                  </span>
+                )}
+              </div>
+              <span className="text-sm text-zinc-300 whitespace-nowrap ml-4">
                 {formatTime(event.start)} - {formatTime(event.end)}
               </span>
             </li>

@@ -72,7 +72,9 @@ export async function fetchEvents() {
     .select(`
       course:courses (
         id,
+        course_code,
         course_name,
+        instructor,
         class_start_time,
         class_end_time,
         meets_monday,
@@ -209,7 +211,9 @@ export async function fetchEventsForDate(dateString: string) {
     .select(`
       course:courses (
         id,
+        course_code,
         course_name,
+        instructor,
         class_start_time,
         class_end_time,
         meets_monday,
@@ -264,6 +268,8 @@ export async function fetchEventsForDate(dateString: string) {
         courseEvents.push({
             id: instanceId,
             title: course.course_name,
+            courseCode: course.course_code,
+            instructor: course.instructor,
             start: start,
             end: end,
             isCourseEvent: true,

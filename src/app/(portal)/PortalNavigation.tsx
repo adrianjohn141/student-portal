@@ -10,6 +10,7 @@ import {
   UserCircle,
   LogOut,
   Menu,
+  ClipboardList,
 } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { logout } from '../actions'
@@ -87,6 +88,17 @@ export default function PortalNavigation({
             >
               <CalendarDays size={20} />
               <span>Schedule</span>
+            </Link>
+            <Link
+              href="/tasks"
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                pathname.startsWith('/tasks')
+                  ? 'bg-white/20 text-white font-medium'
+                  : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <ClipboardList size={20} />
+              <span>Tasks</span>
             </Link>
           </nav>
         </div>
