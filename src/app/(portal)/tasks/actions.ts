@@ -4,6 +4,21 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+export async function getUserRole() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) return null
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+    
+  return profile?.role || 'student'
+}
+
 export async function getTasks() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -16,7 +31,7 @@ export async function getTasks() {
       *,
       course:courses(course_name, course_code, instructor)
     `)
-    .eq('user_id', user.id)
+    .or(`user_id.eq.${user.id},is_global.eq.true`)
     .order('due_date', { ascending: true })
   
   if (error) {
@@ -38,6 +53,20 @@ export async function addTask(formData: FormData) {
   const type = formData.get('type') as string
   const due_date = formData.get('due_date') as string
   const course_id = formData.get('course_id') as string
+  const is_global = formData.get('is_global') === 'on'
+
+  // If trying to create global task, verify admin role
+  if (is_global) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    
+    if (profile?.role !== 'admin') {
+      throw new Error('Unauthorized to create global tasks')
+    }
+  }
 
   const { error } = await supabase.from('tasks').insert({
     user_id: user.id,
@@ -46,7 +75,8 @@ export async function addTask(formData: FormData) {
     type,
     due_date: due_date ? new Date(due_date).toISOString() : null,
     course_id: course_id && course_id !== 'none' ? parseInt(course_id) : null,
-    status: 'To Do'
+    status: 'To Do',
+    is_global: is_global
   })
 
   if (error) {

@@ -89,6 +89,11 @@ export default function Calendar({ initialEvents }: { initialEvents: MyEventType
   const [view, setView] = useState<View>('month');
   const [date, setDate] = useState(new Date());
 
+  // Update local state when initialEvents prop changes (e.g. after revalidatePath)
+  useEffect(() => {
+    setEvents(initialEvents)
+  }, [initialEvents])
+
   // --- ADDED useEffect FOR DEBUGGING ---
   useEffect(() => {
     const handleCourseChange = async () => {

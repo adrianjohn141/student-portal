@@ -7,6 +7,11 @@ import { createClient } from '@/lib/supabase/server'
 export async function login(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+
+  if (!email.toLowerCase().endsWith('psu.edu.ph')) {
+    return redirect('/login?message=Only psu.edu.ph emails are allowed')
+  }
+
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -20,32 +25,6 @@ export async function login(formData: FormData) {
       return redirect('/login?message=Invalid email or password')
     }
     return redirect('/login?message=Could not authenticate user')
-  }
-
-  revalidatePath('/home', 'layout')
-  redirect('/home')
-}
-
-export async function signup(formData: FormData) {
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-
-  // --- VALIDATION ADDED HERE ---
-  if (!email.toLowerCase().endsWith('psu.edu.ph')) {
-    return redirect('/login?message=Error: Only psu.edu.ph emails are allowed.')
-  }
-  // --- END VALIDATION ---
-
-  const supabase = await createClient()
-
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-  })
-
-  if (error) {
-    console.error(error)
-    return redirect('/login?message=Could not sign up user')
   }
 
   revalidatePath('/home', 'layout')

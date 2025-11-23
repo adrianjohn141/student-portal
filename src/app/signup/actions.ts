@@ -32,23 +32,16 @@ export async function signup(formData: FormData) {
   })
 
   if (error) {
-    console.error(error)
     if (error.code === 'user_already_exists') {
       return redirect('/signup?message=User Already Exist')
     }
+    if (error.code === 'over_email_send_rate_limit') {
+      return redirect('/signup?message=Too many attempts. Please wait a minute and try again.')
+    }
+    console.error(error)
     return redirect('/signup?message=Could not sign up user')
   }
 
-  if (user) {
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({ id: user.id, full_name: fullName })
-    if (profileError) {
-      console.error(profileError)
-      return redirect('/signup?message=Could not create user profile')
-    }
-  }
-
   revalidatePath('/', 'layout')
-  redirect('/login?message=Account created successfully! Please log in.')
+  redirect('/login?message=Account created! Please check your email to confirm your account.')
 }

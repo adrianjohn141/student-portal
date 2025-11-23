@@ -15,6 +15,7 @@ type Task = {
   status: 'To Do' | 'In Progress' | 'Done'
   type: 'Assignment' | 'Quiz' | 'Chapter Test' | 'Exam'
   due_date: string | null
+  is_global: boolean
   course_id: number | null
   course: {
     course_code: string | null
@@ -31,10 +32,12 @@ type Course = {
 
 export default function TasksBoard({ 
   initialTasks, 
-  courses 
+  courses,
+  userRole
 }: { 
   initialTasks: Task[]
   courses: Course[]
+  userRole: string | null
 }) {
   const router = useRouter()
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
@@ -149,25 +152,34 @@ export default function TasksBoard({
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="bg-zinc-900/70 border border-white/10 rounded-lg p-4 hover:bg-zinc-900/90 transition-colors group shadow-lg backdrop-blur-sm"
+                      className={`bg-zinc-900/70 border ${task.is_global ? 'border-purple-500/30' : 'border-white/10'} rounded-lg p-4 hover:bg-zinc-900/90 transition-colors group shadow-lg backdrop-blur-sm`}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-bold border shadow-sm ${
-                          task.type === 'Exam' ? 'bg-red-500/30 border-red-500/40 text-red-100' :
-                          task.type === 'Quiz' ? 'bg-yellow-500/30 border-yellow-500/40 text-yellow-100' :
-                          task.type === 'Chapter Test' ? 'bg-orange-500/30 border-orange-500/40 text-orange-100' :
-                          'bg-blue-500/30 border-blue-500/40 text-blue-100'
-                        }`}>
-                          {task.type}
-                        </span>
+                        <div className="flex gap-2">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-bold border shadow-sm ${
+                            task.type === 'Exam' ? 'bg-red-500/30 border-red-500/40 text-red-100' :
+                            task.type === 'Quiz' ? 'bg-yellow-500/30 border-yellow-500/40 text-yellow-100' :
+                            task.type === 'Chapter Test' ? 'bg-orange-500/30 border-orange-500/40 text-orange-100' :
+                            'bg-blue-500/30 border-blue-500/40 text-blue-100'
+                          }`}>
+                            {task.type}
+                          </span>
+                          {task.is_global && (
+                            <span className="text-xs px-2 py-0.5 rounded-full font-bold border shadow-sm bg-purple-500/30 border-purple-500/40 text-purple-100">
+                              Global
+                            </span>
+                          )}
+                        </div>
                         <div className="relative">
-                          <button 
-                            className="text-zinc-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                            onClick={() => setTaskToDelete(task)}
-                            title="Delete task"
-                          >
-                            <MoreVertical size={18} />
-                          </button>
+                          {(userRole === 'admin' || !task.is_global) && (
+                            <button 
+                              className="text-zinc-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                              onClick={() => setTaskToDelete(task)}
+                              title="Delete task"
+                            >
+                              <MoreVertical size={18} />
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -204,32 +216,34 @@ export default function TasksBoard({
                       </div>
 
                       {/* Move Actions */}
-                      <div className="flex gap-1 mt-4 pt-3 border-t border-white/10">
-                        {column.id !== 'To Do' && (
-                          <button
-                            onClick={() => handleStatusChange(task.id, 'To Do')}
-                            className="text-xs px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-colors font-medium"
-                          >
-                            To Do
-                          </button>
-                        )}
-                        {column.id !== 'In Progress' && (
-                          <button
-                            onClick={() => handleStatusChange(task.id, 'In Progress')}
-                            className="text-xs px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-colors font-medium"
-                          >
-                            In Progress
-                          </button>
-                        )}
-                        {column.id !== 'Done' && (
-                          <button
-                            onClick={() => handleStatusChange(task.id, 'Done')}
-                            className="text-xs px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-colors font-medium"
-                          >
-                            Done
-                          </button>
-                        )}
-                      </div>
+                      {(userRole === 'admin' || !task.is_global) && (
+                        <div className="flex gap-1 mt-4 pt-3 border-t border-white/10">
+                          {column.id !== 'To Do' && (
+                            <button
+                              onClick={() => handleStatusChange(task.id, 'To Do')}
+                              className="text-xs px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-colors font-medium"
+                            >
+                              To Do
+                            </button>
+                          )}
+                          {column.id !== 'In Progress' && (
+                            <button
+                              onClick={() => handleStatusChange(task.id, 'In Progress')}
+                              className="text-xs px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-colors font-medium"
+                            >
+                              In Progress
+                            </button>
+                          )}
+                          {column.id !== 'Done' && (
+                            <button
+                              onClick={() => handleStatusChange(task.id, 'Done')}
+                              className="text-xs px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-colors font-medium"
+                            >
+                              Done
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </motion.div>
                   ))}
               </AnimatePresence>
@@ -306,6 +320,20 @@ export default function TasksBoard({
                   className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 transition-colors resize-none"
                 />
               </div>
+
+              {userRole === 'admin' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="is_global"
+                    name="is_global"
+                    className="w-4 h-4 rounded border-white/10 bg-white/5 text-blue-600 focus:ring-blue-500 focus:ring-offset-zinc-900"
+                  />
+                  <label htmlFor="is_global" className="text-sm text-zinc-400 select-none cursor-pointer">
+                    Global Event (Visible to all users)
+                  </label>
+                </div>
+              )}
 
               <div className="flex gap-3 mt-4">
                 <button 

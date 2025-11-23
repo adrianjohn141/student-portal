@@ -13,6 +13,7 @@ type Task = {
   status: 'To Do' | 'In Progress' | 'Done'
   type: 'Assignment' | 'Quiz' | 'Chapter Test' | 'Exam'
   due_date: string | null
+  is_global: boolean
   course_id: number | null
   course: {
     course_code: string | null
@@ -96,6 +97,11 @@ export default function UpcomingTasks() {
                     }`}>
                       {task.type}
                     </span>
+                    {task.is_global && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full border bg-purple-500/20 border-purple-500/30 text-purple-200">
+                        Global
+                      </span>
+                    )}
                   </div>
                   
                   {task.course && (

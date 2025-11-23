@@ -1,12 +1,13 @@
-import { getTasks, getEnrolledCourses } from './actions'
+import { getTasks, getEnrolledCourses, getUserRole } from './actions'
 import TasksBoard from './TasksBoard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function TasksPage() {
-  const [tasks, courses] = await Promise.all([
+  const [tasks, courses, role] = await Promise.all([
     getTasks(),
-    getEnrolledCourses()
+    getEnrolledCourses(),
+    getUserRole()
   ])
 
   // Transform tasks to match the component's expected type if needed
@@ -21,6 +22,7 @@ export default async function TasksPage() {
       <TasksBoard 
         initialTasks={formattedTasks} 
         courses={courses} 
+        userRole={role}
       />
     </div>
   )

@@ -33,3 +33,43 @@ using (auth.uid() = user_id);
 create policy "Users can delete their own tasks"
 on public.tasks for delete
 using (auth.uid() = user_id);
+
+-- UPDATES FOR ADMIN AND GLOBAL TASKS
+
+-- Add role to profiles
+alter table public.profiles add column if not exists role text default 'student' check (role in ('student', 'admin'));
+
+-- Add is_global to tasks
+alter table public.tasks add column if not exists is_global boolean default false;
+
+-- Drop old select policy to replace it
+drop policy if exists "Users can view their own tasks" on public.tasks;
+
+-- Allow users to view their own tasks AND global tasks
+create policy "Users can view their own or global tasks"
+on public.tasks for select
+using (auth.uid() = user_id or is_global = true);
+
+-- Allow admins to insert global tasks
+create policy "Admins can insert global tasks"
+on public.tasks for insert
+with check (
+  (select role from public.profiles where id = auth.uid()) = 'admin'
+  and is_global = true
+);
+
+-- Allow admins to update global tasks
+create policy "Admins can update global tasks"
+on public.tasks for update
+using (
+  (select role from public.profiles where id = auth.uid()) = 'admin'
+  and is_global = true
+);
+
+-- Allow admins to delete global tasks
+create policy "Admins can delete global tasks"
+on public.tasks for delete
+using (
+  (select role from public.profiles where id = auth.uid()) = 'admin'
+  and is_global = true
+);
