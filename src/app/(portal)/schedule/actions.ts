@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { startOfWeek, addDays, getDay, parse, set, formatISO } from 'date-fns'
+import { fromZonedTime } from 'date-fns-tz'
 
 // --- CREATE EVENT ---
 export async function createEvent(formData: FormData) {
@@ -103,10 +104,15 @@ export async function fetchEvents() {
   const startDate = addDays(now, -180) // 6 months ago
   const endDate = addDays(now, 180)   // 6 months future
   
-  // Helper to parse time string "HH:mm" or "HH:mm:ss"
+  // Helper to parse time string "HH:mm" or "HH:mm:ss" and convert to UTC assuming 'Asia/Manila'
   const parseTime = (timeStr: string, baseDate: Date) => {
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      return set(baseDate, { hours, minutes, seconds: 0, milliseconds: 0 });
+    // Construct a string like "YYYY-MM-DD HH:mm:ss" using baseDate (which is correct local date but UTC midnight)
+    // baseDate is used only for the date part.
+    const datePart = formatISO(baseDate, { representation: 'date' })
+    const dateTimeStr = `${datePart} ${timeStr}`
+    
+    // Convert this local time string (in Asia/Manila) to a UTC Date object
+    return fromZonedTime(dateTimeStr, 'Asia/Manila')
   }
 
   for (const item of enrolledCourses) {
@@ -235,10 +241,11 @@ export async function fetchEventsForDate(dateString: string) {
   // 3. Generate Course Events for this specific date
   const courseEvents = []
   
-  // Helper to parse time string "HH:mm" or "HH:mm:ss"
+  // Helper to parse time string "HH:mm" or "HH:mm:ss" and convert to UTC assuming 'Asia/Manila'
   const parseTime = (timeStr: string, baseDate: Date) => {
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      return set(baseDate, { hours, minutes, seconds: 0, milliseconds: 0 });
+    const datePart = formatISO(baseDate, { representation: 'date' })
+    const dateTimeStr = `${datePart} ${timeStr}`
+    return fromZonedTime(dateTimeStr, 'Asia/Manila')
   }
 
   const dayOfWeek = getDay(targetDate)

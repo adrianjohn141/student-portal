@@ -93,21 +93,19 @@ export default function TasksBoard({
     
     const formData = new FormData(e.currentTarget)
     
+    // Convert local date to ISO string with timezone awareness
+    const dueDate = formData.get('due_date') as string
+    if (dueDate) {
+      const date = new Date(dueDate)
+      formData.set('due_date', date.toISOString())
+    }
+    
     try {
       await addTask(formData)
       toast.success('Task created')
       setIsModalOpen(false)
       router.refresh()
-      // We also need to reload the page to fetch the new data since router.refresh() 
-      // might not update the initialTasks prop immediately in this setup without more complex state management
-      // But for now let's trust router.refresh() to trigger a re-render of the Server Component
-      // which will pass new initialTasks.
-      // However, since we have local state `tasks` initialized from `initialTasks`,
-      // we need to watch for prop changes or just force reload.
-      // Actually, the best pattern is to use `useEffect` to update local state when `initialTasks` changes,
-      // or just use `router.refresh()` and not rely on local state for the *list* if we want server truth.
-      // But we are doing optimistic updates.
-      // Let's just reload for simplicity to ensure sync.
+      
       window.location.reload() 
     } catch (error) {
       toast.error('Failed to create task')
