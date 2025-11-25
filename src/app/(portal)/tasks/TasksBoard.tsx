@@ -1,19 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, MoreVertical, Calendar, BookOpen, CheckCircle, Circle, Clock } from 'lucide-react'
+import { Plus, MoreVertical, Calendar, BookOpen, CheckCircle, Circle, Clock, Pencil, Trash2, X } from 'lucide-react'
 import { format } from 'date-fns'
-import { addTask, updateTaskStatus, deleteTask } from './actions'
+import { addTask, updateTaskStatus, deleteTask, updateTask } from './actions'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { TaskSchema, type TaskFormValues } from './schemas'
 
 type Task = {
   id: number
   title: string
   description: string | null
   status: 'To Do' | 'In Progress' | 'Done'
-  type: 'Assignment' | 'Quiz' | 'Chapter Test' | 'Exam'
+  type: 'Assignment' | 'Quiz' | 'Chapter Test' | 'Exam' | 'Activity'
   due_date: string | null
   is_global: boolean
   course_id: number | null
@@ -42,9 +45,59 @@ export default function TasksBoard({
   const router = useRouter()
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [taskToEdit, setTaskToEdit] = useState<Task | null>(null)
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<TaskFormValues>({
+    resolver: zodResolver(TaskSchema),
+    defaultValues: {
+      type: 'Assignment',
+      course_id: 'none',
+    }
+  })
+
+  // Open modal for editing
+  useEffect(() => {
+    if (taskToEdit) {
+      setValue('title', taskToEdit.title)
+      setValue('type', taskToEdit.type)
+      setValue('description', taskToEdit.description || '')
+      setValue('course_id', taskToEdit.course_id?.toString() || 'none')
+      
+      if (taskToEdit.due_date) {
+        // Format for datetime-local input: YYYY-MM-DDThh:mm
+        const date = new Date(taskToEdit.due_date)
+        const dateString = date.toISOString().slice(0, 16)
+        setValue('due_date', dateString)
+      }
+      
+      setValue('is_global', taskToEdit.is_global)
+      setIsModalOpen(true)
+    }
+  }, [taskToEdit, setValue])
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isModalOpen) {
+      // Small delay to prevent clearing while animating out if we had animation
+      // But mainly to ensure next open is clean
+      // Actually, we want to clear taskToEdit when modal closes
+      if (taskToEdit) {
+         setTaskToEdit(null)
+      }
+      reset({
+        type: 'Assignment',
+        course_id: 'none',
+      })
+    }
+  }, [isModalOpen, reset]) // Removed taskToEdit dependency to avoid loop, handled logically
 
   const columns = [
     { id: 'To Do', title: 'To Do', icon: Circle, color: 'text-zinc-200' },
@@ -62,6 +115,7 @@ export default function TasksBoard({
     } catch (error) {
       toast.error('Failed to update task')
       // Revert on error - in a real app we'd fetch fresh data
+      router.refresh()
     }
   }
 
@@ -81,37 +135,41 @@ export default function TasksBoard({
       router.refresh()
     } catch (error) {
       toast.error('Failed to delete task')
-      // Revert not fully implemented for simplicity, would need to re-fetch
+      router.refresh()
     } finally {
       setIsDeleting(false)
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    
-    const formData = new FormData(e.currentTarget)
-    
-    // Convert local date to ISO string with timezone awareness
-    const dueDate = formData.get('due_date') as string
-    if (dueDate) {
-      const date = new Date(dueDate)
-      formData.set('due_date', date.toISOString())
-    }
-    
+  const onFormSubmit = async (data: TaskFormValues) => {
     try {
-      await addTask(formData)
-      toast.success('Task created')
+      if (taskToEdit) {
+        await updateTask(taskToEdit.id, data)
+        toast.success('Task updated successfully')
+      } else {
+        await addTask(data)
+        toast.success('Task created successfully')
+      }
       setIsModalOpen(false)
-      router.refresh()
-      
-      window.location.reload() 
+      // Force reload to ensure everything is synced since we use router.refresh() in actions 
+      // but client state might drift with complex optimistic updates if we don't manage it perfectly
+      window.location.reload()
     } catch (error) {
-      toast.error('Failed to create task')
-    } finally {
-      setIsSubmitting(false)
+      if (error instanceof Error) {
+        toast.error(error.message)
+      } else {
+        toast.error('An unexpected error occurred')
+      }
     }
+  }
+
+  const openAddModal = () => {
+    setTaskToEdit(null)
+    reset({
+        type: 'Assignment',
+        course_id: 'none',
+    })
+    setIsModalOpen(true)
   }
 
   return (
@@ -119,7 +177,7 @@ export default function TasksBoard({
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Quizzes & Assignments</h1>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={openAddModal}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
         >
           <Plus size={20} />
@@ -158,6 +216,7 @@ export default function TasksBoard({
                             task.type === 'Exam' ? 'bg-red-500/30 border-red-500/40 text-red-100' :
                             task.type === 'Quiz' ? 'bg-yellow-500/30 border-yellow-500/40 text-yellow-100' :
                             task.type === 'Chapter Test' ? 'bg-orange-500/30 border-orange-500/40 text-orange-100' :
+                            task.type === 'Activity' ? 'bg-teal-500/30 border-teal-500/40 text-teal-100' :
                             'bg-blue-500/30 border-blue-500/40 text-blue-100'
                           }`}>
                             {task.type}
@@ -168,15 +227,24 @@ export default function TasksBoard({
                             </span>
                           )}
                         </div>
-                        <div className="relative">
+                        <div className="relative flex gap-1">
                           {(userRole === 'admin' || !task.is_global) && (
-                            <button 
-                              className="text-zinc-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                              onClick={() => setTaskToDelete(task)}
-                              title="Delete task"
-                            >
-                              <MoreVertical size={18} />
-                            </button>
+                            <>
+                              <button 
+                                className="text-zinc-400 hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                onClick={() => setTaskToEdit(task)}
+                                title="Edit task"
+                              >
+                                <Pencil size={16} />
+                              </button>
+                              <button 
+                                className="text-zinc-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                onClick={() => setTaskToDelete(task)}
+                                title="Delete task"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </>
                           )}
                         </div>
                       </div>
@@ -256,40 +324,51 @@ export default function TasksBoard({
         ))}
       </div>
 
-      {/* Add Task Modal */}
+      {/* Add/Edit Task Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-white/10 rounded-xl p-6 w-full max-w-md shadow-xl" onClick={e => e.stopPropagation()}>
-            <h2 className="text-xl font-bold mb-4">Add New Task</h2>
+          <div className="bg-zinc-900 border border-white/10 rounded-xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+               <h2 className="text-xl font-bold">{taskToEdit ? 'Edit Task' : 'Add New Task'}</h2>
+               <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-white">
+                  <X size={24} />
+               </button>
+            </div>
             
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col gap-4">
               <div>
                 <label className="block text-sm text-zinc-400 mb-1">Title</label>
                 <input 
-                  name="title" 
-                  required 
+                  {...register('title')}
                   placeholder="e.g., Calculus Midterm"
                   className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 transition-colors"
                 />
+                {errors.title && (
+                  <span className="text-red-400 text-xs mt-1">{errors.title.message}</span>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm text-zinc-400 mb-1">Type</label>
                 <select 
-                  name="type" 
+                  {...register('type')}
                   className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 transition-colors [&>option]:bg-zinc-900"
                 >
                   <option value="Assignment">Assignment</option>
                   <option value="Quiz">Quiz</option>
                   <option value="Chapter Test">Chapter Test</option>
                   <option value="Exam">Exam</option>
+                  <option value="Activity">Activity</option>
                 </select>
+                {errors.type && (
+                  <span className="text-red-400 text-xs mt-1">{errors.type.message}</span>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm text-zinc-400 mb-1">Course (Optional)</label>
                 <select 
-                  name="course_id" 
+                  {...register('course_id')}
                   className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 transition-colors [&>option]:bg-zinc-900"
                 >
                   <option value="none">None</option>
@@ -299,24 +378,33 @@ export default function TasksBoard({
                     </option>
                   ))}
                 </select>
+                {errors.course_id && (
+                  <span className="text-red-400 text-xs mt-1">{errors.course_id.message}</span>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm text-zinc-400 mb-1">Due Date</label>
                 <input 
-                  name="due_date" 
                   type="datetime-local"
+                  {...register('due_date')}
                   className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 transition-colors [color-scheme:dark]"
                 />
+                {errors.due_date && (
+                  <span className="text-red-400 text-xs mt-1">{errors.due_date.message}</span>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm text-zinc-400 mb-1">Description</label>
                 <textarea 
-                  name="description" 
+                  {...register('description')}
                   rows={3}
                   className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 transition-colors resize-none"
                 />
+                {errors.description && (
+                  <span className="text-red-400 text-xs mt-1">{errors.description.message}</span>
+                )}
               </div>
 
               {userRole === 'admin' && (
@@ -324,7 +412,7 @@ export default function TasksBoard({
                   <input
                     type="checkbox"
                     id="is_global"
-                    name="is_global"
+                    {...register('is_global')}
                     className="w-4 h-4 rounded border-white/10 bg-white/5 text-blue-600 focus:ring-blue-500 focus:ring-offset-zinc-900"
                   />
                   <label htmlFor="is_global" className="text-sm text-zinc-400 select-none cursor-pointer">
@@ -346,7 +434,7 @@ export default function TasksBoard({
                   disabled={isSubmitting}
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? 'Creating...' : 'Create Task'}
+                  {isSubmitting ? (taskToEdit ? 'Updating...' : 'Creating...') : (taskToEdit ? 'Update Task' : 'Create Task')}
                 </button>
               </div>
             </form>
