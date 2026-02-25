@@ -17,7 +17,7 @@ A comprehensive student portal application built with Next.js 16 and Supabase, d
 
 ### 🔐 Authentication & Security
 - **Secure Login/Signup:** Email and password authentication via Supabase.
-- **Student Verification:** Intended for students with valid institutional emails (`psu.edu.ph`).
+- **Student Verification:** Intended for students with valid.
 - **Protected Routes:** Middleware-protected portal access.
 
 ### 📚 Course Management
