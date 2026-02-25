@@ -9,7 +9,7 @@ import { Toaster } from 'sonner'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'BSCS-A Portal',
+  title: 'Student Portal',
   description: 'BSCS A Student Portal',
 }
 

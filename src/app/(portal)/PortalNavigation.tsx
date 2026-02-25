@@ -52,50 +52,46 @@ export default function PortalNavigation({
                    md:translate-x-0`}
       >
         <div className="flex-1 flex flex-col gap-2">
-          <span className="font-semibold text-lg mb-4">BSCS-A Portal</span>
+          <span className="font-semibold text-lg mb-4">Student Portal</span>
 
           {/* Main Navigation */}
           <nav className="flex flex-col gap-2">
             <Link
               href="/home"
-              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                pathname.startsWith('/home')
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/home')
                   ? 'bg-white/20 text-white font-medium'
                   : 'text-zinc-300 hover:bg-white/10 hover:text-white'
-              }`}
+                }`}
             >
               <BookOpen size={18} />
               <span>Home</span>
             </Link>
             <Link
               href="/courses"
-              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                pathname.startsWith('/courses')
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/courses')
                   ? 'bg-white/20 text-white font-medium'
                   : 'text-zinc-300 hover:bg-white/10 hover:text-white'
-              }`}
+                }`}
             >
               <BookOpen size={18} />
               <span>My Courses</span>
             </Link>
             <Link
               href="/schedule"
-              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                pathname.startsWith('/schedule')
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/schedule')
                   ? 'bg-white/20 text-white font-medium'
                   : 'text-zinc-300 hover:bg-white/10 hover:text-white'
-              }`}
+                }`}
             >
               <CalendarDays size={20} />
               <span>Schedule</span>
             </Link>
             <Link
               href="/tasks"
-              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                pathname.startsWith('/tasks')
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/tasks')
                   ? 'bg-white/20 text-white font-medium'
                   : 'text-zinc-300 hover:bg-white/10 hover:text-white'
-              }`}
+                }`}
             >
               <ClipboardList size={20} />
               <span>Tasks</span>
@@ -107,22 +103,20 @@ export default function PortalNavigation({
         <div className="flex flex-col gap-2">
           <Link
             href="/profile"
-            className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-              pathname.startsWith('/profile')
+            className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/profile')
                 ? 'bg-white/20 text-white font-medium'
                 : 'text-zinc-300 hover:bg-white/10 hover:text-white'
-            }`}
+              }`}
           >
             <UserCircle size={18} />
             <span>profile</span>
           </Link>
           <Link
             href="/settings"
-            className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-              pathname.startsWith('/settings')
+            className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/settings')
                 ? 'bg-white/20 text-white font-medium'
                 : 'text-zinc-300 hover:bg-white/10 hover:text-white'
-            }`}
+              }`}
           >
             <Settings size={18} />
             <span>Settings</span>
@@ -154,7 +148,7 @@ export default function PortalNavigation({
         <button onClick={() => setIsSidebarOpen(true)}>
           <Menu size={24} />
         </button>
-        <span className="font-semibold text-lg">BSCS-A Portal</span>
+        <span className="font-semibold text-lg">Student Portal</span>
       </header>
 
       {/* --- OVERLAY (for mobile) --- */}

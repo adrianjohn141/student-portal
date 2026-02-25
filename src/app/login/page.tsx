@@ -34,7 +34,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center space-y-2 text-center">
           <Image src="/globe.svg" alt="Globe Icon" width={48} height={48} />
           <h1 className="text-2xl font-semibold tracking-tight text-white">
-            BSCS-A Portal
+            Student Portal
           </h1>
           <p className="text-sm text-zinc-300">
             Enter your credentials to sign in or create an account
