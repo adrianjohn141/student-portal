@@ -8,10 +8,6 @@ export async function login(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  if (!email.toLowerCase().endsWith('psu.edu.ph')) {
-    return redirect('/login?message=Only psu.edu.ph emails are allowed')
-  }
-
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signInWithPassword({

@@ -14,11 +14,6 @@ export async function signup(formData: FormData) {
     return redirect('/signup?message=Password not match')
   }
 
-  const emailRegex = /^25ln\d{4}_ms@psu\.edu\.ph$/
-  if (!emailRegex.test(email)) {
-    return redirect('/signup?message=Invalid email format')
-  }
-
   const supabase = await createClient()
 
   const { data: { user }, error } = await supabase.auth.signUp({

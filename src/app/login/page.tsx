@@ -42,7 +42,7 @@ export default function LoginPage() {
         </div>
         <LoginForm />
         <p className="px-8 text-center text-sm text-zinc-300">
-          By signing up, you agree that you are a student with a valid psu.edu.ph email.
+          By signing up, you  are agreeing to our Terms of Service and Privacy Policy.
         </p>
       </div>
     </div>
@@ -60,7 +60,6 @@ function LoginForm() {
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
-          hd: 'psu.edu.ph',
         },
         redirectTo: `${window.location.origin}/auth/callback`,
       },
@@ -98,7 +97,7 @@ function LoginForm() {
           className="rounded-md px-4 py-2 bg-black/20 border border-white/10 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors hover:bg-black/30"
           id="email"
           name="email"
-          placeholder="you@example.edu"
+          placeholder="you@example.com"
           required
           type="email"
         />

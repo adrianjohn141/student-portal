@@ -10,17 +10,8 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    
-    if (!error) {
-      // Check if email is from the correct domain
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (user?.email && !user.email.endsWith('psu.edu.ph')) {
-        // Sign out if not allowed
-        await supabase.auth.signOut()
-        return NextResponse.redirect(`${origin}/login?message=Error: Only psu.edu.ph emails are allowed.`)
-      }
 
+    if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
     }
   }

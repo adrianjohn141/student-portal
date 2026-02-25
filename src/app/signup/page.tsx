@@ -78,7 +78,7 @@ function SignupForm() {
           className="rounded-md px-4 py-2 bg-inherit border border-zinc-600 text-white placeholder-zinc-400"
           id="email"
           name="email"
-          placeholder="25ln0000_ms@psu.edu.ph"
+          placeholder="name@example.com"
           required
           type="email"
         />
