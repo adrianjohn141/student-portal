@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   ClipboardList,
+  Award,
 } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { logout } from '../actions'
@@ -59,8 +60,8 @@ export default function PortalNavigation({
             <Link
               href="/home"
               className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/home')
-                  ? 'bg-white/20 text-white font-medium'
-                  : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+                ? 'bg-white/20 text-white font-medium'
+                : 'text-zinc-300 hover:bg-white/10 hover:text-white'
                 }`}
             >
               <BookOpen size={18} />
@@ -69,8 +70,8 @@ export default function PortalNavigation({
             <Link
               href="/courses"
               className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/courses')
-                  ? 'bg-white/20 text-white font-medium'
-                  : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+                ? 'bg-white/20 text-white font-medium'
+                : 'text-zinc-300 hover:bg-white/10 hover:text-white'
                 }`}
             >
               <BookOpen size={18} />
@@ -79,8 +80,8 @@ export default function PortalNavigation({
             <Link
               href="/schedule"
               className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/schedule')
-                  ? 'bg-white/20 text-white font-medium'
-                  : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+                ? 'bg-white/20 text-white font-medium'
+                : 'text-zinc-300 hover:bg-white/10 hover:text-white'
                 }`}
             >
               <CalendarDays size={20} />
@@ -89,12 +90,22 @@ export default function PortalNavigation({
             <Link
               href="/tasks"
               className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/tasks')
-                  ? 'bg-white/20 text-white font-medium'
-                  : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+                ? 'bg-white/20 text-white font-medium'
+                : 'text-zinc-300 hover:bg-white/10 hover:text-white'
                 }`}
             >
               <ClipboardList size={20} />
               <span>Tasks</span>
+            </Link>
+            <Link
+              href="/grades"
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/grades')
+                ? 'bg-white/20 text-white font-medium'
+                : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+                }`}
+            >
+              <Award size={20} />
+              <span>Grades</span>
             </Link>
           </nav>
         </div>
@@ -104,8 +115,8 @@ export default function PortalNavigation({
           <Link
             href="/profile"
             className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/profile')
-                ? 'bg-white/20 text-white font-medium'
-                : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+              ? 'bg-white/20 text-white font-medium'
+              : 'text-zinc-300 hover:bg-white/10 hover:text-white'
               }`}
           >
             <UserCircle size={18} />
@@ -114,8 +125,8 @@ export default function PortalNavigation({
           <Link
             href="/settings"
             className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${pathname.startsWith('/settings')
-                ? 'bg-white/20 text-white font-medium'
-                : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+              ? 'bg-white/20 text-white font-medium'
+              : 'text-zinc-300 hover:bg-white/10 hover:text-white'
               }`}
           >
             <Settings size={18} />
